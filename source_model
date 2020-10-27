@@ -4,7 +4,7 @@ classdef source_model
     
     properties
         M,N;
-        Image
+        image
     end
     
     methods
@@ -13,7 +13,7 @@ classdef source_model
             %   此处显示详细说明
             obj.M = m;
             obj.N = n;
-            obj.Image = zeros(m,n);
+            obj.image = zeros(m,n);
         end
         %%create point source
         function point_source()
@@ -21,7 +21,7 @@ classdef source_model
         end
         %%create disk source
         function obj = disk_source(obj,pos_x,pos_y)
-            obj.Image = obj.create_source(pos_x,pos_y,'disk');
+            obj.image = obj.create_source(pos_x,pos_y,'disk');
             %obj.Image = put_pos(source_charact,pos_x,pos_y);
         end
         function source_charact = create_source(~,x,y,shape)
@@ -41,16 +41,16 @@ classdef source_model
         %%create binary source
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-        function source_charact = create_disk_source(range_x,range_y)
-            mu=[0,0];
-            Sigma=[1,0;0,1];
-            [X,Y]=meshgrid(-x:0.01:x+10,-y:0.01:y+10);
-            p=mvnpdf([X(:) Y(:)],mu,Sigma);
-            p=reshape(p,size(X));
+        function obj = create_gauss_source(~,pos_x,pos_y,range_x,range_y)
+            miu = [0,0];
+            sigma = [1,0;0,1];
+            [X,Y] = meshgrid(linspace(-range_x,range_x,100),linspace(-range_y,range_y,100));
+            p = mvnpdf([X(:) Y(:)],miu,sigma);
+            p = reshape(p,size(X));
+            obj.image = put_pos(p,pos_x,pos_y,range_x,range_y);
         end
-        function im = put_pos(~,source_charact,x,y)
-            
-            
+        function obj = put_pos(~,source_charact,x,y,range_x,range_y)
+            obj.image(x:x+2*range_x-1,y:y+2*range_y-1) = source_charact;
         end
         function outputArg = method1(obj,inputArg)
             %METHOD1 此处显示有关此方法的摘要
