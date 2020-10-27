@@ -1,0 +1,15 @@
+function [outputArg1,outputArg2] = main_run(inputArg1,inputArg2)
+%MAIN_RUN 此处显示有关此函数的摘要
+%   此处显示详细说明
+S = source_model(100,100);
+S.disk_source(1,1);
+clear
+clc
+mu=[0,0];
+Sigma=[1,0.5;0.5,1];
+[X,Y]=meshgrid(-10:0.01:10,-10:0.01:10);
+p=mvnpdf([X(:) Y(:)],mu,Sigma);
+p=reshape(p,size(X));
+imshow(p);
+end
+
