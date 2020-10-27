@@ -1,0 +1,62 @@
+classdef source_model
+    %SOURCE_MODEL 此处显示有关此类的摘要
+    %   此处显示详细说明
+    
+    properties
+        M,N;
+        Image
+    end
+    
+    methods
+        function obj = source_model(m,n)
+            %SOURCE_MODEL 构造此类的实例
+            %   此处显示详细说明
+            obj.M = m;
+            obj.N = n;
+            obj.Image = zeros(m,n);
+        end
+        %%create point source
+        function point_source()
+            
+        end
+        %%create disk source
+        function obj = disk_source(obj,pos_x,pos_y)
+            obj.Image = obj.create_source(pos_x,pos_y,'disk');
+            %obj.Image = put_pos(source_charact,pos_x,pos_y);
+        end
+        function source_charact = create_source(~,x,y,shape)
+            switch shape
+                case 'disk'
+                    source_charact = create_disk_source(x,y);
+                case 'gauss'
+                    source_charact = create_gauss_source(x,y);
+                case 'binary'
+                    source_charact = create_binary_source(x,y);
+                otherwise
+                    fprintf('illegal shape')
+            end
+        end
+        
+        %%create gauss source
+        %%create binary source
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        function source_charact = create_disk_source(range_x,range_y)
+            mu=[0,0];
+            Sigma=[1,0;0,1];
+            [X,Y]=meshgrid(-x:0.01:x+10,-y:0.01:y+10);
+            p=mvnpdf([X(:) Y(:)],mu,Sigma);
+            p=reshape(p,size(X));
+        end
+        function im = put_pos(~,source_charact,x,y)
+            
+            
+        end
+        function outputArg = method1(obj,inputArg)
+            %METHOD1 此处显示有关此方法的摘要
+            %   此处显示详细说明
+            outputArg = obj.Property1 + inputArg;
+        end
+    end
+end
+
