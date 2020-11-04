@@ -1,10 +1,11 @@
-classdef source_model
+classdef source_model < handle
     %SOURCE_MODEL 此处显示有关此类的摘要
     %   此处显示详细说明
     
     properties
         M,N;
-        image
+        step = 100;
+        image;
     end
     
     methods
@@ -21,41 +22,50 @@ classdef source_model
         end
         %%create disk source
         function obj = disk_source(obj,pos_x,pos_y)
-            obj.image = obj.create_source(pos_x,pos_y,'disk');
-            %obj.Image = put_pos(source_charact,pos_x,pos_y);
+            source_charact = obj.create_source(range_x,range_y,'gauss');
+            obj.put_pos(source_charact,pos_x,pos_y,obj.step);
         end
-        function source_charact = create_source(~,x,y,shape)
+        %%create gauss source
+        function obj = gauss_source(obj,pos_x,pos_y,range_x,range_y)
+            source_charact = obj.create_source(range_x,range_y,'gauss');
+            obj.put_pos(source_charact,pos_x,pos_y,obj.step);
+        end
+        %%create binary source
+        function obj = binary_source(obj,pos_x1,pos_y1,pos_x2,pos_y2,range_x1,range_y1,range_x2,range_y2)
+            source_charact1 = obj.create_source(range_x1,range_y1,'binary');
+            obj.put_pos(source_charact1,pos_x1,pos_y1,obj.step);
+            source_charact2 = obj.create_source(range_x2,range_y2,'binary');
+            obj.put_pos(source_charact2,pos_x2,pos_y2,obj.step);
+        end
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        function source_charact = create_source(obj,range_x,range_y,shape)
             switch shape
                 case 'disk'
-                    source_charact = create_disk_source(x,y);
+                    source_charact = obj.create_disk_source(range_x,range_y);
                 case 'gauss'
-                    source_charact = create_gauss_source(x,y);
+                    source_charact = obj.create_gauss_source(range_x,range_y);
                 case 'binary'
-                    source_charact = create_binary_source(x,y);
+                    source_charact = obj.create_binary_source(range_x,range_y);
                 otherwise
                     fprintf('illegal shape')
             end
         end
-        
-        %%create gauss source
-        %%create binary source
-        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-        function obj = create_gauss_source(~,pos_x,pos_y,range_x,range_y)
-            miu = [0,0];
-            sigma = [1,0;0,1];
-            [X,Y] = meshgrid(linspace(-range_x,range_x,100),linspace(-range_y,range_y,100));
+        function p = create_disk_source(obj,range_x,range_y)
+            
+        end
+        function p = create_gauss_source(obj,range_x,range_y)
+            miu = [0,0];sigma = [0.1,0;0,0.1];
+            [X,Y] = meshgrid(linspace(-range_x,range_x,obj.step),linspace(-range_y,range_y,obj.step));
             p = mvnpdf([X(:) Y(:)],miu,sigma);
             p = reshape(p,size(X));
-            obj.image = put_pos(p,pos_x,pos_y,range_x,range_y);
+            %obj.put_pos(p,pos_x,pos_y,step);
         end
-        function obj = put_pos(~,source_charact,x,y,range_x,range_y)
-            obj.image(x:x+2*range_x-1,y:y+2*range_y-1) = source_charact;
+        function p = create_binary_source(obj,range_x,range_y,shape)
+            
         end
-        function outputArg = method1(obj,inputArg)
-            %METHOD1 此处显示有关此方法的摘要
-            %   此处显示详细说明
-            outputArg = obj.Property1 + inputArg;
+        function obj = put_pos(obj,source_charact,pos_x,pos_y,step)
+            obj.image(1+pos_x:pos_x+step,1+pos_y:pos_y+step) = source_charact;
         end
     end
 end
