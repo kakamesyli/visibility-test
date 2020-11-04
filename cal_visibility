@@ -1,0 +1,78 @@
+classdef cal_visibility < source_model
+    %CAL_VISIBILITY 此处显示有关此类的摘要
+    %   此处显示详细说明
+    
+    properties
+        visib_image;
+    end
+    
+    methods
+        function obj = cal_visibility(m,n)
+            obj = obj@source_model(m,n);
+            obj.visib_image = zeros(m,n);
+        end
+        function obj = cal_visib(obj,shape)
+            image_range = 512;
+            switch shape
+                case 'disk'
+                case 'gauss'
+                    pos_x = 50;
+                    pos_y = 50;
+                    s = source_model(image_range,image_range);
+                    s.gauss_source(pos_x,pos_y,5,5);
+                    figure(1);
+                    imshow(s.image);
+                    obj.visib_image = obj.cal_fft(s.image);
+                case 'binary'
+                    %%%%两点大小和位置
+                    pos_x1 = 150;
+                    pos_y1 = 150;
+                    pos_x2 = 200;
+                    pos_y2 = 200;
+                    %%%%定义两点
+                    s1 = source_model(image_range,image_range);
+                    s1.gauss_source(pos_x1,pos_y1,5,5);
+                    s2 = source_model(image_range,image_range);
+                    s2.gauss_source(pos_x2,pos_y2,5,5);
+                    %%%%输出原始图像
+                    figure(1);
+                    imshow(s1.image+s2.image);
+                    %%%%计算visibility
+                    f1 = 1;%定义1点亮度权重
+                    f2 = 1;%定义2点亮度权重
+                    f = f2/f1;
+                    v1 = obj.cal_fft(s1.image);
+                    v2 = obj.cal_fft(s2.image);
+                    V = obj.cal_binary(v1,v2,f,pos_x1,pos_y1,pos_x2,pos_y2);
+                    obj.visib_image = obj.cal_norm(V);
+                otherwise
+                    fprintf('illegal input');
+            end
+        end
+        function v = cal_fft(obj,image)
+            v = fftshift(fft2(image));
+            v = obj.cal_sqrt(v);
+        end
+        function sq = cal_sqrt(~,v)
+            sq = sqrt( (imag(v)).^2 + (real(v)).^2 );
+        end
+        function VIS = cal_binary(obj,v1,v2,f,pos_x1,pos_y1,pos_x2,pos_y2)
+            vec = obj.cal_vec(pos_x1,pos_y1,pos_x2,pos_y2);
+            V1 = obj.cal_sqrt(v1);
+            V2 = obj.cal_sqrt(v2);
+            %VIS = cos(vec);
+            VIS = ( v1.^2 + f.*v2.^2 + 2*V1*V2.*cos(vec/256/0.01) ) ./ (1 + f)^2 ;
+        end
+        function norm = cal_norm(~,v)
+            norm = (imag(v)).^2 + (real(v)).^2;
+        end
+        function vec = cal_vec(obj,pos_x1,pos_y1,pos_x2,pos_y2)
+            lambda = 550e-9;
+            r1 = pos_x1-pos_x2;
+            r2 = pos_y1-pos_y2;
+            [U,V] = meshgrid(-(obj.M)/2:(obj.M)/2-1,-(obj.N)/2:(obj.N)/2-1);%应注意矩阵的坐标方向
+            vec = 2*pi*(lambda*(U'.*r1+V'.*r2))/lambda;
+        end
+    end
+end
+
