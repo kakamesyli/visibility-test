@@ -1,15 +1,27 @@
-function [outputArg1,outputArg2] = main_run(inputArg1,inputArg2)
+function [] = main_run()
 %MAIN_RUN 此处显示有关此函数的摘要
 %   此处显示详细说明
-S = source_model(100,100);
-S.disk_source(1,1);
-clear
+image_range = 512;
+%{
+s = source_model(image_range,image_range);
+s.gauss_source(50,50,5,5);
+figure(1);
+imshow(s.image);
+%}
+v = cal_visibility(image_range,image_range);
+v.cal_visib('binary');
+figure(2);
+imshow(v.visib_image,[]);
+
+%{
 clc
-mu=[0,0];
-Sigma=[1,0.5;0.5,1];
-[X,Y]=meshgrid(-10:0.01:10,-10:0.01:10);
-p=mvnpdf([X(:) Y(:)],mu,Sigma);
-p=reshape(p,size(X));
+clear
+miu = [0,0];sigma = [0.1,0;0,0.1];
+            step = 100;range_x=3;range_y=3;
+            [X,Y] = meshgrid(linspace(-range_x,range_x,step),linspace(-range_y,range_y,step));
+            p = mvnpdf([X(:) Y(:)],miu,sigma);
+            p = reshape(p,size(X));
 imshow(p);
+%}
 end
 
